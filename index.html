@@ -1,13 +1,77 @@
-echo '<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>My HTML Files</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sql格式化工具</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+        }
+        main {
+            flex: 1;
+            margin: 20px auto;
+            width: 200px;
+            max-width: 100%;
+            background: white;
+            padding: 200px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            overflow: auto; /* 添加滚动条 */
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            margin: 10px 0;
+        }
+        a {
+            text-decoration: none;
+            color: #4CAF50;
+            font-size: 18px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #f1f1f1;
+            color: #777;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to My HTML Files</h1>
-    <ul>
-        <li><a href="Mybatis SQL Log解析.html">Mybatis SQL Log解析</a></li>
-        <li><a href="sql语句加引号.html">sql语句加引号</a></li>
-    </ul>
+    <header>
+        <h1>SQL 小助手 </h1>
+    </header>
+    <main>
+        <ul>
+            <li><a href="Mybatis SQL Log解析.html">Mybatis SQL Log解析</a></li>
+            <li><a href="sql语句加引号.html">sql语句加引号</a></li>
+        </ul>
+    </main>
+    <footer>
+        <p>Created by shenyang</p>
+    </footer>
 </body>
-</html>' > index.html
+</html>
