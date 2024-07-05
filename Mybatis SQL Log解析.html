@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+    <meta charset="utf-8">
+    <title>MybatisLog</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+
+<body>
+<h1 align="center"><span style="color: #672ae1; "> Mybatis SQL日志转换</span></h1>
+
+<div class="layui-form-item layui-form-text">
+    <h2><span style="color: #00bfff; ">输入Mybatis SQL日志：</span></h2>
+    <div class="layui-input-block">
+        <label for="log"></label>
+        <textarea rows="13" cols="140" style="font-size:20px;width:95%"
+                  placeholder="在此处粘贴解析前的sql:" id="log" name="log" class="layui-textarea"></textarea>
+    </div>
+</div>
+<div style="border:0 deepskyblue solid;;width:95%;height:50px;text-align:right">
+    <button type="button" class="layui-btn layui-btn-warm" onclick="transLog()">转换并复制</button>
+    <button type="button" class="layui-btn layui-btn-warm" onclick="clearLog()">清空输入</button>
+    <button type="button" class="layui-btn layui-btn-warm" onclick="clearOut()">清空输出</button>
+</div>
+
+<div class="layui-form-item layui-form-text">
+    <h2><span style="color: #32cd32; ">解析为可执行SQL：</span></h2>
+    <label for="sql"></label><textarea id="sql" rows="13" cols="140" style="font-size:20px;width:95%"
+                                       placeholder="在此处复制解析后的sql:"></textarea>
+</div>
+
+<script>
+    /**
+     * 处理日志
+     */
+    function transLog() {
+        let textVa = document.getElementById("log").value;
+        clearOut();
+        getSql(textVa);
+        copyToClip();
+    }
+
+    /**
+     * 解析sql
+     */
+    function getSql(textVa) {
+        // 获取带问号的SQL语句
+        let statementStartIndex = textVa.indexOf('Preparing: ');
+        let statementEndIndex = textVa.length - 1;
+        for (let i = statementStartIndex; i < textVa.length; i++) {
+            if (textVa[i] === "\n") {
+                statementEndIndex = i;
+                break;
+            }
+        }
+        let statementStr = textVa.substring(statementStartIndex + "Preparing: ".length, statementEndIndex);
+        // console.log(statementStr);
+        //获取参数
+        let parametersStartIndex = textVa.indexOf('Parameters: ');
+        let parametersEndIndex = textVa.length;
+        for (let i = parametersStartIndex; i < textVa.length; i++) {
+            if (textVa[i] === "\n") {
+                parametersEndIndex = i;
+                break;
+            }
+        }
+        let parametersStr = textVa.substring(parametersStartIndex + "Parameters: ".length, parametersEndIndex);
+        // console.log(parametersStr);
+        // 参数列表
+        let parametersStrArr = parametersStr.split(",");
+        let typeStr;
+        let tempStr;
+        for (let i = 0; i < parametersStrArr.length; i++) {
+            tempStr = parametersStrArr[i].substring(0, parametersStrArr[i].indexOf("("));
+            // 不含"("是null
+            if (tempStr === '') {
+                tempStr = "null";
+            }
+            // 如果数据中带括号需要判断参数类型
+            typeStr = parametersStrArr[i].substring(parametersStrArr[i].indexOf("(") + 1, parametersStrArr[i].indexOf(")"));
+            if (typeStr === "String" || typeStr === "Timestamp") {
+                statementStr = statementStr.replace("?", "'" + tempStr.trim() + "'");
+            } else {
+                statementStr = statementStr.replace("?", tempStr.trim());
+            }
+        }
+        document.getElementById("sql").style.display = "inline-block";
+        document.getElementById("sql").innerHTML += statementStr;
+        let newText = textVa.substring(parametersEndIndex);
+        if (newText.indexOf('Preparing: ') === -1) return;
+        let splitLine = ";\n-- ----------------------------------------------------------------------------------------------------------------------\n";
+        document.getElementById("sql").innerHTML += splitLine;
+        getSql(newText);
+    }
+
+    /**
+     * 复制到剪贴板
+     */
+    function copyToClip() {
+        let sql = document.getElementById("sql");
+        sql.select();  // 选择对象
+        document.execCommand("copy"); // 执行浏览器复制命令
+        if ("" !== sql.value) {
+            layer.msg("复制成功，直接粘贴即可");
+        } else {
+            layer.alert("转换失败");
+        }
+    }
+
+    /**
+     * 清空输入
+     */
+    function clearLog() {
+        let log = document.getElementById("log");
+        log.select();
+        log.value = "";
+    }
+
+    /**
+     * 清空输出
+     */
+    function clearOut() {
+        let sql = document.getElementById("sql");
+        sql.innerHTML = "";
+    }
+
+</script>
+</body>
+
+</html>

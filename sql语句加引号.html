@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>内容转换</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    
+    h1 {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+    
+    textarea {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    
+    button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+  <script>
+    function convertContent(singleToDouble) {
+      var input = document.getElementById("inputText").value;
+      var lines = input.split(/\s+/);
+      var output = "";
+      
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (line !== "") {
+          var quotationMark = singleToDouble ? '"' : "'";
+          output += quotationMark + line + quotationMark + ",";
+        }
+      }
+      
+      if (output !== "") {
+        output = output.slice(0, -1);
+      }
+      
+      document.getElementById("outputText").value = output;
+      
+      var outputTextArea = document.getElementById("outputText");
+      outputTextArea.select();
+      document.execCommand("copy");
+    }
+    
+    function clearInput() {
+      document.getElementById("inputText").value = "";
+      document.getElementById("outputText").value = "";
+    }
+    
+    function swapContent() {
+      var input = document.getElementById("inputText").value;
+      var output = document.getElementById("outputText").value;
+      
+      document.getElementById("inputText").value = output;
+      document.getElementById("outputText").value = input;
+    }
+    
+    function restoreContent() {
+      var input = document.getElementById("inputText").value;
+      var output = input.replace(/['"]/g, "");
+      output = output.replace(/,/g, " ");
+      
+      document.getElementById("outputText").value = output;
+    }
+  </script>
+</head>
+<body>
+  <h1>内容转换</h1>
+  
+  <label for="inputText">输入内容：</label>
+  <textarea id="inputText" rows="5" placeholder="在此处输入内容"></textarea>
+  
+  <br>
+  
+  <button onclick="convertContent(false)">转换为单引号</button>
+  <button onclick="convertContent(true)">转换为双引号</button>
+  <button onclick="clearInput()">清除</button>
+  <button onclick="swapContent()">交换内容</button>
+  <button onclick="restoreContent()">恢复内容</button>
+  
+  <br>
+  
+  <label for="outputText">转换结果：</label>
+  <textarea id="outputText" rows="5" readonly></textarea>
+</body>
+</html>
