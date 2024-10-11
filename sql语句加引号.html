@@ -1,103 +1,229 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
+
 <head>
-  <title>内容转换</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    
-    h1 {
-      margin-bottom: 20px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 10px;
-    }
-    
-    textarea {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-    
-    button {
-      padding: 8px 16px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
-  <script>
-    function convertContent(singleToDouble) {
-      var input = document.getElementById("inputText").value;
-      var lines = input.split(/\s+/);
-      var output = "";
-      
-      for (var i = 0; i < lines.length; i++) {
-        var line = lines[i].trim();
-        if (line !== "") {
-          var quotationMark = singleToDouble ? '"' : "'";
-          output += quotationMark + line + quotationMark + ",";
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容转换工具</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --primary-color: #2c0c00;
+            --secondary-color: #e0e7ff;
+            --border-color: #d1d5db;
         }
-      }
-      
-      if (output !== "") {
-        output = output.slice(0, -1);
-      }
-      
-      document.getElementById("outputText").value = output;
-      
-      var outputTextArea = document.getElementById("outputText");
-      outputTextArea.select();
-      document.execCommand("copy");
-    }
-    
-    function clearInput() {
-      document.getElementById("inputText").value = "";
-      document.getElementById("outputText").value = "";
-    }
-    
-    function swapContent() {
-      var input = document.getElementById("inputText").value;
-      var output = document.getElementById("outputText").value;
-      
-      document.getElementById("inputText").value = output;
-      document.getElementById("outputText").value = input;
-    }
-    
-    function restoreContent() {
-      var input = document.getElementById("inputText").value;
-      var output = input.replace(/['"]/g, "");
-      output = output.replace(/,/g, " ");
-      
-      document.getElementById("outputText").value = output;
-    }
-  </script>
+
+        .dark-mode {
+            --bg-color: #1f2937;
+            --text-color: #f3f4f6;
+            --primary-color: #398dd5;
+            --secondary-color: #374151;
+            --border-color: #4b5563;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #e0f7fa, #c8e6c9);
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: var(--secondary-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px 10px 0 0;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        textarea {
+            width: calc(100% - 20px);
+            height: 200px;
+            margin-bottom: 10px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            resize: vertical;
+        }
+
+        .buttons {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 4px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+            transform: scale(1.02);
+        }
+
+        #darkModeToggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        textarea::placeholder {
+            color: #a0a0a0;
+        }
+
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 30px;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
 </head>
+
 <body>
-  <h1>内容转换</h1>
-  
-  <label for="inputText">输入内容：</label>
-  <textarea id="inputText" rows="5" placeholder="在此处输入内容"></textarea>
-  
-  <br>
-  
-  <button onclick="convertContent(false)">转换为单引号</button>
-  <button onclick="convertContent(true)">转换为双引号</button>
-  <button onclick="clearInput()">清除</button>
-  <button onclick="swapContent()">交换内容</button>
-  <button onclick="restoreContent()">恢复内容</button>
-  
-  <br>
-  
-  <label for="outputText">转换结果：</label>
-  <textarea id="outputText" rows="5" readonly></textarea>
+    <div class="container">
+        <header>
+            <h1>内容转换工具</h1>
+            <button id="darkModeToggle">🌙</button>
+        </header>
+        <main>
+            <h2>输入内容：</h2>
+            <textarea id="inputText" placeholder="在此处输入内容..."></textarea>
+
+            <div class="buttons">
+                <button onclick="convertContent(false)">转换为单引号</button>
+                <button onclick="convertContent(true)">转换为双引号</button>
+                <button onclick="clearInput()">清空输入</button>
+                <button onclick="swapContent()">交换内容</button>
+                <button onclick="restoreContent()">恢复内容</button>
+            </div>
+
+            <h2>转换结果：</h2>
+            <textarea id="outputText" readonly placeholder="在此处显示转换结果..."></textarea>
+        </main>
+    </div>
+
+    <div id="toast" class="toast">结果已复制到剪贴板！</div>
+
+    <script>
+        function convertContent(singleToDouble) {
+            var input = document.getElementById("inputText").value;
+            var lines = input.split(/\s+/);
+            var output = "";
+
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+                if (line !== "") {
+                    var quotationMark = singleToDouble ? '"' : "'";
+                    output += quotationMark + line + quotationMark + ",";
+                }
+            }
+
+            if (output !== "") {
+                output = output.slice(0, -1);
+            }
+
+            document.getElementById("outputText").value = output;
+            copyToClipboard();
+        }
+
+        function copyToClipboard() {
+            var outputText = document.getElementById("outputText");
+            outputText.select();
+            document.execCommand("copy");
+            showToast();
+        }
+
+        function clearInput() {
+            document.getElementById("inputText").value = '';
+            document.getElementById("outputText").value = '';
+        }
+
+        function swapContent() {
+            var input = document.getElementById("inputText").value;
+            var output = document.getElementById("outputText").value;
+
+            document.getElementById("inputText").value = output;
+            document.getElementById("outputText").value = input;
+        }
+
+        function restoreContent() {
+            var input = document.getElementById("inputText").value;
+            var output = input.replace(/['"]/g, "").replace(/,/g, " ");
+            document.getElementById("outputText").value = output;
+        }
+
+        function showToast() {
+            var toast = document.getElementById("toast");
+            toast.classList.add("show");
+            setTimeout(function() {
+                toast.classList.remove("show");
+            }, 800);
+        }
+
+        document.getElementById('darkModeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            this.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+    </script>
 </body>
+
 </html>
