@@ -1,40 +1,44 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sql格式化工具</title>
+    <title>SQL 小助手</title>
     <style>
         body {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #4c9caf, #81c784);
+            color: #4c9caf;
+            justify-content: center;
+            align-items: center;
         }
         header {
-            background-color: #4CAF50;
+            background-color: transparent;
             color: white;
             text-align: center;
-            padding: 1em 0;
+            padding: 1.5em 0;
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
         }
         main {
-            flex: 1;
-            margin: 20px auto;
-            width: 200px;
-            max-width: 100%;
+            width: 500px; /* 调整宽度 */
+            max-width: 90%;
             background: white;
-            padding: 200px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 40px; /* 增加内边距 */
+            border-radius: 20px; /* 增加圆角 */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             text-align: center;
-            overflow: auto; /* 添加滚动条 */
+            animation: fadeIn 1s ease-in-out;
         }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         ul {
             list-style-type: none;
@@ -42,32 +46,42 @@
             margin: 0;
         }
         li {
-            margin: 10px 0;
+            margin: 20px 0;
         }
         a {
+            display: block;
             text-decoration: none;
-            color: #4CAF50;
-            font-size: 18px;
+            color: white;
+            background-color: #4caf50;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
         a:hover {
-            text-decoration: underline;
+            background-color: #388e3c;
+            transform: translateY(-3px);
         }
         footer {
             text-align: center;
-            padding: 10px 0;
-            background-color: #f1f1f1;
-            color: #777;
+            padding: 15px 0;
+            color: #ddd;
+            font-size: 14px;
+        }
+        footer p {
+            margin: 0;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>SQL 小助手 </h1>
+        <h1>SQL 小助手</h1>
     </header>
     <main>
         <ul>
-            <li><a href="Mybatis SQL Log解析.html">Mybatis SQL Log解析</a></li>
-            <li><a href="sql语句加引号.html">sql语句加引号</a></li>
+            <li><a href="Mybatis SQL Log解析.html">Mybatis SQL Log 解析</a></li>
+            <li><a href="sql语句加引号.html">SQL 条件加引号</a></li>
         </ul>
     </main>
     <footer>
