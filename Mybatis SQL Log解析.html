@@ -1,133 +1,252 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="zh-CN">
 
 <head>
-    <meta charset="utf-8">
-    <title>MybatisLog</title>
-    <meta name="renderer" content="webkit">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mybatis SQL 日志转换器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --primary-color: #2c0c00;
+            --secondary-color: #e0e7ff;
+            --border-color: #d1d5db;
+        }
+
+        .dark-mode {
+            --bg-color: #1f2937;
+            --text-color: #f3f4f6;
+            --primary-color: #398dd5;
+            --secondary-color: #374151;
+            --border-color: #4b5563;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: var(--secondary-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px 10px 0 0;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        textarea {
+            width: calc(100% - 20px);
+            /* 给右侧留白 */
+
+            height: 200px;
+            margin-bottom: 10px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            resize: vertical;
+        }
+
+        .buttons {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 4px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+            transform: scale(1.02);
+        }
+
+        #darkModeToggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        textarea::placeholder {
+            color: #a0a0a0;
+        }
+
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 30px;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
 </head>
 
 <body>
-<h1 align="center"><span style="color: #672ae1; "> Mybatis SQL日志转换</span></h1>
+    <div class="container">
+        <header>
+            <h1>Mybatis SQL 日志转换器</h1>
+            <button id="darkModeToggle">🌙</button>
+        </header>
+        <main>
+            <h2>输入 Mybatis SQL 日志：</h2>
+            <textarea id="inputLog" placeholder="在此处粘贴解析前的 SQL 日志..."></textarea>
 
-<div class="layui-form-item layui-form-text">
-    <h2><span style="color: #00bfff; ">输入Mybatis SQL日志：</span></h2>
-    <div class="layui-input-block">
-        <label for="log"></label>
-        <textarea rows="13" cols="140" style="font-size:20px;width:95%"
-                  placeholder="在此处粘贴解析前的sql:" id="log" name="log" class="layui-textarea"></textarea>
+            <div class="buttons">
+                <button onclick="transLog()">转换并复制</button>
+                <button onclick="clearLog()">清空输入</button>
+                <button onclick="clearOut()">清空输出</button>
+            </div>
+
+            <h2>解析为可执行 SQL：</h2>
+            <textarea id="outputSQL" readonly placeholder="在此处显示解析后的 SQL..."></textarea>
+        </main>
     </div>
-</div>
-<div style="border:0 deepskyblue solid;;width:95%;height:50px;text-align:right">
-    <button type="button" class="layui-btn layui-btn-warm" onclick="transLog()">转换并复制</button>
-    <button type="button" class="layui-btn layui-btn-warm" onclick="clearLog()">清空输入</button>
-    <button type="button" class="layui-btn layui-btn-warm" onclick="clearOut()">清空输出</button>
-</div>
 
-<div class="layui-form-item layui-form-text">
-    <h2><span style="color: #32cd32; ">解析为可执行SQL：</span></h2>
-    <label for="sql"></label><textarea id="sql" rows="13" cols="140" style="font-size:20px;width:95%"
-                                       placeholder="在此处复制解析后的sql:"></textarea>
-</div>
+    <div id="toast" class="toast">SQL 已复制到剪贴板！</div>
 
-<script>
-    /**
-     * 处理日志
-     */
-    function transLog() {
-        let textVa = document.getElementById("log").value;
-        clearOut();
-        getSql(textVa);
-        copyToClip();
-    }
-
-    /**
-     * 解析sql
-     */
-    function getSql(textVa) {
-        // 获取带问号的SQL语句
-        let statementStartIndex = textVa.indexOf('Preparing: ');
-        let statementEndIndex = textVa.length - 1;
-        for (let i = statementStartIndex; i < textVa.length; i++) {
-            if (textVa[i] === "\n") {
-                statementEndIndex = i;
-                break;
-            }
+    <script>
+        function transLog() {
+            const inputLog = document.getElementById('inputLog').value;
+            const sqlStatements = getSql(inputLog);
+            const outputSQL = sqlStatements.join('\n-- ----------------------------------------------------------------------------------------------------------------------\n');
+            document.getElementById('outputSQL').value = outputSQL;
+            copyToClip();
         }
-        let statementStr = textVa.substring(statementStartIndex + "Preparing: ".length, statementEndIndex);
-        // console.log(statementStr);
-        //获取参数
-        let parametersStartIndex = textVa.indexOf('Parameters: ');
-        let parametersEndIndex = textVa.length;
-        for (let i = parametersStartIndex; i < textVa.length; i++) {
-            if (textVa[i] === "\n") {
-                parametersEndIndex = i;
-                break;
+
+        function getSql(textVa) {
+            const sqlStatements = [];
+            const logs = textVa.split('\n');
+            let currentStatement = '';
+            let currentParameters = '';
+
+            logs.forEach((line) => {
+                if (line.includes('Preparing: ')) {
+                    if (currentStatement) {
+                        sqlStatements.push(replaceParameters(currentStatement, currentParameters));
+                    }
+                    currentStatement = line.split('Preparing: ')[1];
+                    currentParameters = '';
+                } else if (line.includes('Parameters: ')) {
+                    currentParameters = line.split('Parameters: ')[1];
+                }
+            });
+
+            if (currentStatement) {
+                sqlStatements.push(replaceParameters(currentStatement, currentParameters));
             }
+
+            return sqlStatements;
         }
-        let parametersStr = textVa.substring(parametersStartIndex + "Parameters: ".length, parametersEndIndex);
-        // console.log(parametersStr);
-        // 参数列表
-        let parametersStrArr = parametersStr.split(",");
-        let typeStr;
-        let tempStr;
-        for (let i = 0; i < parametersStrArr.length; i++) {
-            tempStr = parametersStrArr[i].substring(0, parametersStrArr[i].indexOf("("));
-            // 不含"("是null
-            if (tempStr === '') {
-                tempStr = "null";
-            }
-            // 如果数据中带括号需要判断参数类型
-            typeStr = parametersStrArr[i].substring(parametersStrArr[i].indexOf("(") + 1, parametersStrArr[i].indexOf(")"));
-            if (typeStr === "String" || typeStr === "Timestamp") {
-                statementStr = statementStr.replace("?", "'" + tempStr.trim() + "'");
-            } else {
-                statementStr = statementStr.replace("?", tempStr.trim());
-            }
+
+        function replaceParameters(statement, parameters) {
+            const paramArray = parameters.split(', ');
+            let index = 0;
+
+            return statement.replace(/\?/g, () => {
+                const param = paramArray[index++];
+                if (!param) return '?';
+
+                const [value, type] = param.split('(');
+                const trimmedValue = value.trim();
+
+                if (trimmedValue === 'null') return 'NULL';
+                if (type.startsWith('String') || type.startsWith('Timestamp')) {
+                    return `'${trimmedValue}'`;
+                }
+                return trimmedValue;
+            });
         }
-        document.getElementById("sql").style.display = "inline-block";
-        document.getElementById("sql").innerHTML += statementStr;
-        let newText = textVa.substring(parametersEndIndex);
-        if (newText.indexOf('Preparing: ') === -1) return;
-        let splitLine = ";\n-- ----------------------------------------------------------------------------------------------------------------------\n";
-        document.getElementById("sql").innerHTML += splitLine;
-        getSql(newText);
-    }
 
-    /**
-     * 复制到剪贴板
-     */
-    function copyToClip() {
-        let sql = document.getElementById("sql");
-        sql.select();  // 选择对象
-        document.execCommand("copy"); // 执行浏览器复制命令
-        if ("" !== sql.value) {
-            layer.msg("复制成功，直接粘贴即可");
-        } else {
-            layer.alert("转换失败");
+        function copyToClip() {
+            const outputSQL = document.getElementById('outputSQL');
+            outputSQL.select();
+            document.execCommand('copy');
+
+            showToast();
         }
-    }
 
-    /**
-     * 清空输入
-     */
-    function clearLog() {
-        let log = document.getElementById("log");
-        log.select();
-        log.value = "";
-    }
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 800); // 0.8秒后隐藏提示框
+        }
 
-    /**
-     * 清空输出
-     */
-    function clearOut() {
-        let sql = document.getElementById("sql");
-        sql.innerHTML = "";
-    }
+        function clearLog() {
+            document.getElementById('inputLog').value = '';
+        }
 
-</script>
+        function clearOut() {
+            document.getElementById('outputSQL').value = '';
+        }
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            darkModeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+    </script>
 </body>
 
 </html>
