@@ -31,16 +31,51 @@
             background: linear-gradient(135deg, #e0f7fa, #c8e6c9);
             transition: background-color 0.3s, color 0.3s;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
 
         .container {
-            max-width: 850px;
-            margin: 0 auto;
-            background-color: var(--secondary-color);
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 180px;
+            background-color: #26333f;
             padding: 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-radius: 5px;
+        }
+
+        .sidebar h2 {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: block;
+            transition: color 0.3s;
+        }
+
+        .sidebar a:hover {
+            color: var(--button-hover);
+        }
+
+        /* Main content */
+        .main-content {
+            flex-grow: 1;
+            background-color: var(--secondary-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
         header {
@@ -50,7 +85,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 10px 10px 0 0;
+            border-radius: 10px;
         }
 
         h1 {
@@ -60,10 +95,12 @@
 
         main {
             padding: 20px;
+            flex-grow: 1;
         }
 
         textarea {
             width: calc(100% - 20px);
+            /* 给右侧留白 */
             height: 200px;
             margin-bottom: 10px;
             padding: 12px;
@@ -140,26 +177,38 @@
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <h1>内容转换工具</h1>
-            <button id="darkModeToggle">🌙</button>
-        </header>
-        <main>
-            <h2>输入内容：</h2>
-            <textarea id="inputText" placeholder="在此处输入内容..."></textarea>
+        <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>工具菜单</h2>
+            <a href="Mybatis SQL Log解析.html" class="sub-link">SQL 解析</a>
+            <a href="sql语句加引号.html" class="sub-link">SQL 条件加引号</a>
+            <a href="#">帮助</a>
+        </div>
 
-            <div class="buttons">
-                <button onclick="convertContent(false)">转换为单引号</button>
-                <button onclick="convertContent(true)">转换为双引号</button>
-                <button onclick="clearInput()">清空输入</button>
-                <button onclick="swapContent()">交换内容</button>
-                <button onclick="restoreContent()">恢复内容</button>
-            </div>
+        <!-- Main content area -->
+        <div class="main-content">
+            <header>
+                <h1>内容转换工具</h1>
+                <button id="darkModeToggle">🌙</button>
+            </header>
 
-            <h2>转换结果：</h2>
-            <textarea id="outputText" readonly placeholder="在此处显示转换结果..."></textarea>
-        </main>
+            <main>
+                <h2>输入内容：</h2>
+                <textarea id="inputText" placeholder="在此处输入内容..."></textarea>
+
+                <div class="buttons">
+                    <button onclick="convertContent(false)">转换为单引号</button>
+                    <button onclick="convertContent(true)">转换为双引号</button>
+                    <button onclick="clearInput()">清空输入</button>
+                    <button onclick="swapContent()">交换内容</button>
+                    <button onclick="restoreContent()">恢复内容</button>
+                </div>
+
+                <h2>转换结果：</h2>
+                <textarea id="outputText" readonly placeholder="在此处显示转换结果..."></textarea>
+            </main>
+        </div>
     </div>
 
     <div id="toast" class="toast">结果已复制到剪贴板！</div>
@@ -201,29 +250,34 @@
         function swapContent() {
             var input = document.getElementById("inputText").value;
             var output = document.getElementById("outputText").value;
-
             document.getElementById("inputText").value = output;
             document.getElementById("outputText").value = input;
         }
 
         function restoreContent() {
             var input = document.getElementById("inputText").value;
-            var output = input.replace(/['"]/g, "").replace(/,/g, " ");
-            document.getElementById("outputText").value = output;
+            var originalText = input.replace(/['"]/g, "");
+            document.getElementById("outputText").value = originalText;
         }
+
+        function toggleSubMenu() {
+            var subLinks = document.querySelectorAll(".sub-link");
+            subLinks.forEach(link => link.classList.toggle("show"));
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+
+        document.getElementById("darkModeToggle").addEventListener("click", toggleDarkMode);
 
         function showToast() {
             var toast = document.getElementById("toast");
             toast.classList.add("show");
             setTimeout(function() {
                 toast.classList.remove("show");
-            }, 800);
+            }, 3000);
         }
-
-        document.getElementById('darkModeToggle').addEventListener('click', function() {
-            document.body.classList.toggle('dark-mode');
-            this.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
-        });
     </script>
 </body>
 
