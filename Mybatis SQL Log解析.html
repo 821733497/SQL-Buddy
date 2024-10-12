@@ -31,16 +31,51 @@
             background: linear-gradient(135deg, #e0f7fa, #c8e6c9);
             transition: background-color 0.3s, color 0.3s;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
 
         .container {
-            max-width: 850px;
-            margin: 0 auto;
-            background-color: var(--secondary-color);
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 160px;
+            background-color: #26333f;
             padding: 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-radius: 5px;
+        }
+
+        .sidebar h2 {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: block;
+            transition: color 0.3s;
+        }
+
+        .sidebar a:hover {
+            color: var(--button-hover);
+        }
+
+        /* Main content */
+        .main-content {
+            flex-grow: 1;
+            background-color: var(--secondary-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
         header {
@@ -50,7 +85,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 10px 10px 0 0;
+            border-radius: 10px;
         }
 
         h1 {
@@ -60,12 +95,12 @@
 
         main {
             padding: 20px;
+            flex-grow: 1;
         }
 
         textarea {
             width: calc(100% - 20px);
             /* 给右侧留白 */
-
             height: 200px;
             margin-bottom: 10px;
             padding: 12px;
@@ -143,23 +178,35 @@
 
 <body>
     <div class="container">
-        <header>
-            <h1>Mybatis SQL 日志转换器</h1>
-            <button id="darkModeToggle">🌙</button>
-        </header>
-        <main>
-            <h2>输入 Mybatis SQL 日志：</h2>
-            <textarea id="inputLog" placeholder="在此处粘贴解析前的 SQL 日志..."></textarea>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>工具菜单</h2>
+            <a href="Mybatis SQL Log解析.html" class="sub-link">SQL 解析</a>
+            <a href="sql语句加引号.html" class="sub-link">SQL 条件加引号</a>
+            <a href="#">帮助</a>
+        </div>
 
-            <div class="buttons">
-                <button onclick="transLog()">转换并复制</button>
-                <button onclick="clearLog()">清空输入</button>
-                <button onclick="clearOut()">清空输出</button>
-            </div>
+        <!-- Main content area -->
+        <div class="main-content">
+            <header>
+                <h1>Mybatis SQL 日志转换器</h1>
+                <button id="darkModeToggle">🌙</button>
+            </header>
 
-            <h2>解析为可执行 SQL：</h2>
-            <textarea id="outputSQL" readonly placeholder="在此处显示解析后的 SQL..."></textarea>
-        </main>
+            <main>
+                <h2>输入 Mybatis SQL 日志：</h2>
+                <textarea id="inputLog" placeholder="在此处粘贴解析前的 SQL 日志..."></textarea>
+
+                <div class="buttons">
+                    <button onclick="transLog()">转换并复制</button>
+                    <button onclick="clearLog()">清空输入</button>
+                    <button onclick="clearOut()">清空输出</button>
+                </div>
+
+                <h2>解析为可执行 SQL：</h2>
+                <textarea id="outputSQL" readonly placeholder="在此处显示解析后的 SQL..."></textarea>
+            </main>
+        </div>
     </div>
 
     <div id="toast" class="toast">SQL 已复制到剪贴板！</div>
