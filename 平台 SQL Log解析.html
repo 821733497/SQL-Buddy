@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平台 SQL 日志转换器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --primary-color: #2c0c00;
+            --secondary-color: #e0e7ff;
+            --border-color: #d1d5db;
+            --button-hover: #589978;
+        }
+
+        .dark-mode {
+            --bg-color: #1f2937;
+            --text-color: #f3f4f6;
+            --primary-color: #398dd5;
+            --secondary-color: #374151;
+            --border-color: #4b5563;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #e0f7fa, #c8e6c9);
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 160px;
+            background-color: #26333f;
+            padding: 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-radius: 5px;
+        }
+
+        .sidebar h2 {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: block;
+            transition: color 0.3s;
+        }
+
+        .sidebar a:hover {
+            color: var(--button-hover);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            background-color: var(--secondary-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        main {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        textarea {
+            width: calc(100% - 20px);
+            height: 200px;
+            margin-bottom: 10px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            resize: vertical;
+        }
+
+        .buttons {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 4px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+            transform: scale(1.02);
+        }
+
+        #darkModeToggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 30px;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>工具菜单</h2>
+            <a href="Mybatis SQL Log解析.html" class="sub-link">Mybatis SQL 解析</a>
+	<a href="平台 SQL Log解析.html" class="sub-link">平台 SQL 解析</a>
+            <a href="sql语句加引号.html" class="sub-link">SQL 条件加引号</a>
+            <a href="index.html">回到主页</a>
+        </div>
+
+        <div class="main-content">
+            <header>
+                <h1>平台 SQL 日志转换器</h1>
+                <button id="darkModeToggle">🌙</button>
+            </header>
+
+            <main>
+                <h2>输入 平台 SQL 日志：</h2>
+                <textarea id="inputLog" placeholder="在此处粘贴解析前的 内容..."></textarea>
+
+                <div class="buttons">
+                    <button onclick="transLog()">转换为 INSERT 语句</button>
+                    <button onclick="convertToJson()">转换为 JSON 格式</button>
+                    <button onclick="clearLog()">清空输入</button>
+                    <button onclick="clearOut()">清空输出</button>
+                </div>
+
+                <h2>输出结果：</h2>
+                <textarea id="outputSQL" readonly placeholder="在此处显示解析后的 内容..."></textarea>
+            </main>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">已复制到剪贴板！</div>
+
+    <script>
+        function transLog() {
+            const inputLog = document.getElementById('inputLog').value;
+            const data = JSON.parse(inputLog);
+            const tableName = data.full_sql.match(/from (\w+)/i)[1];
+            const columnList = data.column_list;
+            const rows = data.rows;
+
+            const sqlResult = `INSERT INTO ${tableName} (\n    ${columnList.join(",\n    ")}\n)\nVALUES\n` +
+                rows.map(row => {
+                    const values = row.map(value => value === null ? "null" : `"${value}"`).join(", ");
+                    return `(\n    ${values}\n)`;
+                }).join(",\n") + ";";
+
+            document.getElementById('outputSQL').value = sqlResult;
+            copyToClip();
+        }
+
+function convertToJson() {
+    const inputLog = document.getElementById('inputLog').value;
+    const data = JSON.parse(inputLog);
+    const columnList = data.column_list;
+    const rows = data.rows;
+
+    const jsonResult = rows.map(row => {
+        const obj = {};
+        columnList.forEach((col, index) => {
+            obj[col] = row[index] !== null ? row[index].toString() : null;
+        });
+        return obj;
+    });
+
+    const outputElement = document.getElementById('outputSQL');
+    outputElement.value = JSON.stringify(jsonResult, null, 4);
+    copyToClip();  
+}
+
+
+        function copyToClip() {
+            const outputSQL = document.getElementById('outputSQL');
+            outputSQL.select();
+            document.execCommand('copy');
+            showToast();
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 800);
+        }
+
+        function clearLog() {
+            document.getElementById('inputLog').value = '';
+        }
+
+        function clearOut() {
+            document.getElementById('outputSQL').value = '';
+        }
+
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            darkModeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+    </script>
+</body>
+
+</html>
